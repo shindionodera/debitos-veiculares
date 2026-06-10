@@ -1,0 +1,71 @@
+EXPLICAÇÃO DOS ARQUIVOS
+
+composer.json
+  - Define a dependência mínima de PHP e o autoload PSR-4 para o namespace App\.
+
+Dockerfile
+  - Cria um container PHP CLI que copia o projeto, instala o Composer e executa o script principal.
+
+.dockerignore
+  - Ignora pastas e arquivos que não precisam entrar na imagem.
+
+README.md
+  - Documenta a estrutura, como montar a build e os conceitos de SOLID e padrões de projeto.
+
+sample-request.json
+  - Exemplo de entrada JSON para testar a aplicação.
+
+public/index.php
+  - Ponto de entrada que lê JSON da entrada padrão, cria o serviço e imprime resultado JSON.
+
+src/Domain/Debt.php
+  - Representa um débito veicular com tipo, valor e data de vencimento.
+
+src/Domain/VehicleDebts.php
+  - Agrupa todos os débitos de um veículo e expõe métodos de soma e busca por tipo.
+
+src/Provider/ProviderInterface.php
+  - Contrato para provedores externos simulados.
+
+src/Provider/ProviderA.php
+  - Simula retorno JSON de um provedor externo.
+
+src/Provider/ProviderB.php
+  - Simula retorno XML de outro provedor externo.
+
+src/Provider/ProviderFactory.php
+  - Cria instâncias de provedores com base em nomes, demonstrando o padrão Factory.
+
+src/Provider/ProviderRepository.php
+  - Encapsula a lista de provedores e lógica de fallback em caso de falhas.
+
+src/Normalizer/ProviderNormalizerInterface.php
+  - Contrato para normalizar dados externos em modelo canônico.
+
+src/Normalizer/ProviderANormalizer.php
+  - Converte JSON do Provedor A em `VehicleDebts`.
+
+src/Normalizer/ProviderBNormalizer.php
+  - Converte XML do Provedor B em `VehicleDebts`, inclusive elemento vazio.
+
+src/Service/DebtService.php
+  - Orquestra consulta a provedores, fallback, normalização, avaliação de juros e simulação de pagamento.
+  - Gera resposta no formato `placa` / `debitos` / `resumo` / `pagamentos`.
+
+src/Service/DebtEvaluator.php
+  - Calcula dias de atraso, juros simples e valores atualizados de cada débito usando a data fixa 2024-05-10T00:00:00Z.
+
+src/Service/UnknownDebtTypeException.php
+  - Representa erro quando um tipo de débito desconhecido é retornado pelos provedores.
+
+src/Service/PaymentSimulator.php
+  - Simula pagamento PIX com desconto e parcelamento de cartão com fórmula Price para 1x, 6x e 12x.
+
+src/Request/RequestValidator.php
+  - Valida o corpo JSON, tamanho de requisição, campos permitidos e formato de placa.
+
+src/Provider/ProviderUnavailableException.php
+  - Exceção usada para simular e detectar indisponibilidade de provedores.
+
+src/Service/AllProvidersUnavailableException.php
+  - Exceção para sinalizar que nenhum provedor está disponível.
