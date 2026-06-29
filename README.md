@@ -13,7 +13,6 @@ Projeto em PHP para consulta e simulação de pagamento de débitos veiculares
 - `composer.json` - autoload PSR-4
 - `Dockerfile` - container para execução
 - `docker-compose.yml` - orquestração do container com persistência de logs
-- `sample-request.json` - exemplo de entrada
 
 ## Conceitos usados
 
@@ -53,13 +52,13 @@ A aplicação registra logs estruturados em `src/Log/StructuredLogger.php`, salv
 No Linux/macOS:
 
 ```bash
-docker compose run --rm debitos-veiculares < sample-request.json
+docker compose run --rm debitos-veiculares < '{"placa": "ABC1234"}'
 ```
 
 No Windows (PowerShell):
 
 ```powershell
-Get-Content sample-request.json | docker compose run --rm debitos-veiculares
+'{"placa": "ABC1234"}' | docker compose run --rm debitos-veiculares
 ```
 
 O arquivo de log estará disponível em `logs/search.log` na raiz do projeto, mesmo com o container sendo removido ao final da execução.
@@ -69,13 +68,13 @@ O arquivo de log estará disponível em `logs/search.log` na raiz do projeto, me
 No Linux/macOS ou em shells compatíveis com redirecionamento padrão:
 
 ```bash
-docker run --rm -v "$(pwd)/logs:/app/logs" debitos-veiculares < sample-request.json
+docker run --rm -v "$(pwd)/logs:/app/logs" debitos-veiculares < '{"placa": "ABC1234"}'
 ```
 
 No Windows (PowerShell):
 
 ```powershell
-Get-Content sample-request.json | docker run --rm -i -v ${PWD}/logs:/app/logs debitos-veiculares
+'{"placa": "ABC1234"}' | docker run --rm -i -v ${PWD}/logs:/app/logs debitos-veiculares
 ```
 
 O serviço lerá JSON da entrada padrão e retornará resultado JSON com débitos normalizados, juros e opções de pagamento.
