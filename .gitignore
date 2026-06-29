@@ -1,5 +1,7 @@
 /vendor
+/logs
 /.idea
 /.vscode
 /.env
 composer.lock
+sample-request.json

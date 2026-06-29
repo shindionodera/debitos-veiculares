@@ -30,9 +30,7 @@ class StructuredLogger
 
     private function maskPlate(?string $licensePlate): ?string
     {
-        if ($licensePlate === null) {
-            return null;
-        }
+        if ($licensePlate === null) return null;
 
         $licensePlate = trim($licensePlate);
         $length = mb_strlen($licensePlate);

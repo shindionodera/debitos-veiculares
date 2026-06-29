@@ -12,16 +12,17 @@ Projeto em PHP para consulta e simulação de pagamento de débitos veiculares
 - `public/index.php` - ponto de entrada da aplicação
 - `composer.json` - autoload PSR-4
 - `Dockerfile` - container para execução
+- `docker-compose.yml` - orquestração do container com persistência de logs
 - `sample-request.json` - exemplo de entrada
 
 ## Conceitos usados
 
 - SOLID
-  - Single Responsibility: classes com responsabilidade única.
-  - Open/Closed: novos provedores podem ser adicionados sem modificar classes existentes.
-  - Liskov Substitution: serviços dependem de abstracções, não de implementações.
-  - Interface Segregation: provedores e normalizadores estão separados.
-  - Dependency Inversion: camada mais alta depende de interfaces em vez de classes concretas.
+  - Classes com responsabilidade única.
+  - Novos provedores podem ser adicionados sem modificar classes existentes.
+  - Serviços dependem de abstrações, não de implementações.
+  - Provedores e normalizadores estão separados.
+  - Camada mais alta depende de interfaces em vez de classes concretas.
 
 - Padrões de projeto
   - Factory: `ProviderFactory` cria providers por nome.
@@ -45,16 +46,36 @@ docker build -t debitos-veiculares .
 
 ## Como executar
 
+A aplicação registra logs estruturados em `src/Log/StructuredLogger.php`, salvos em `logs/search.log` dentro do container. Para que esses logs não sejam perdidos quando o container é removido, recomenda-se usar `docker-compose`, que monta a pasta `logs/` do host (sua máquina) com a pasta `logs/` do container.
+
+### Usando docker-compose (recomendado)
+
+No Linux/macOS:
+
+```bash
+docker compose run --rm debitos-veiculares < sample-request.json
+```
+
+No Windows (PowerShell):
+
+```powershell
+Get-Content sample-request.json | docker compose run --rm debitos-veiculares
+```
+
+O arquivo de log estará disponível em `logs/search.log` na raiz do projeto, mesmo com o container sendo removido ao final da execução.
+
+### Usando docker run diretamente
+
 No Linux/macOS ou em shells compatíveis com redirecionamento padrão:
 
 ```bash
-docker run --rm debitos-veiculares < sample-request.json
+docker run --rm -v "$(pwd)/logs:/app/logs" debitos-veiculares < sample-request.json
 ```
 
-No Windows use:
+No Windows (PowerShell):
 
 ```powershell
-Get-Content sample-request.json | docker run --rm -i debitos-veiculares
+Get-Content sample-request.json | docker run --rm -i -v ${PWD}/logs:/app/logs debitos-veiculares
 ```
 
 O serviço lerá JSON da entrada padrão e retornará resultado JSON com débitos normalizados, juros e opções de pagamento.
@@ -99,6 +120,7 @@ Novos tipos de débito podem ser suportados sem alterar o código de avaliação
 - O projeto valida a placa e rejeita requisições inválidas com `400`.
 - Quando todos os provedores falham, retorna `503`.
 - Quando o tipo de débito não é suportado, retorna `422`.
+- Os logs de busca são salvos em `logs/search.log`, com a placa parcialmente mascarada por privacidade. Use `docker-compose` ou a flag `-v` do `docker run` para persistir esse arquivo fora do container.
 
 ## Regras de negócio aplicadas
 

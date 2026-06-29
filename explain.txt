@@ -6,12 +6,6 @@ composer.json
 Dockerfile
   - Cria um container PHP CLI que copia o projeto, instala o Composer e executa o script principal.
 
-.dockerignore
-  - Ignora pastas e arquivos que não precisam entrar na imagem.
-
-README.md
-  - Documenta a estrutura, como montar a build e os conceitos de SOLID e padrões de projeto.
-
 sample-request.json
   - Exemplo de entrada JSON para testar a aplicação.
 

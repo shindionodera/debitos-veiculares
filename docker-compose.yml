@@ -1,0 +1,6 @@
+services:
+  debitos-veiculares:
+    build: .
+    volumes:
+      - ./logs:/app/logs
+    stdin_open: true

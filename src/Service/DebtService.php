@@ -57,31 +57,26 @@ class DebtService
     private function fetchFromProviders(string $licensePlate): VehicleDebts
     {
         $providers = $this->repository->all();
-        $failedProviders = 0;
 
         /** @var ProviderInterface $provider */
         foreach ($providers as $provider) {
             try {
                 $response = $provider->fetch($licensePlate);
                 $normalizer = $this->findNormalizer($provider);
-                $vehicleDebts = $normalizer->normalize($response);
 
-                if ($vehicleDebts->totalAmount() > 0.0) {
-                    return $vehicleDebts;
-                }
+                // Para no primeiro provedor que responde com sucesso,
+                // mesmo que venha com lista vazia (placa sem débitos é resultado válido).
+                return $normalizer->normalize($response);
             } catch (ProviderUnavailableException $error) {
-                $failedProviders++;
                 continue;
             } catch (\Throwable $error) {
+                // Erro inesperado (ex: resposta malformada) também pula para o próximo.
                 continue;
             }
         }
 
-        if ($failedProviders === count($providers)) {
-            throw new AllProvidersUnavailableException('All providers failed.');
-        }
-
-        return new VehicleDebts($licensePlate, []);
+        // Se o loop terminou sem retornar, todos os provedores falharam.
+        throw new AllProvidersUnavailableException('All providers failed.');
     }
 
     private function findNormalizer(ProviderInterface $provider): ProviderNormalizerInterface
