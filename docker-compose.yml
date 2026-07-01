@@ -3,4 +3,6 @@ services:
     build: .
     volumes:
       - ./logs:/app/logs
-    stdin_open: true
+    ports:
+      - "8000:8000"
+    command: ["php", "-S", "0.0.0.0:8000", "-t", "public", "public/router.php"]

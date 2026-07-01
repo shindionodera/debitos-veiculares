@@ -47,18 +47,20 @@ docker build -t debitos-veiculares .
 
 A aplicação registra logs estruturados em `src/Log/StructuredLogger.php`, salvos em `logs/search.log` dentro do container. Para que esses logs não sejam perdidos quando o container é removido, recomenda-se usar `docker-compose`, que monta a pasta `logs/` do host (sua máquina) com a pasta `logs/` do container.
 
+Utilizar a String do JSON para simular a entrada da placa, exemplo: '{"placa": "ABC1234"}', '{"placa": "XYZ9999"}'
+
 ### Usando docker-compose (recomendado)
 
 No Linux/macOS:
 
 ```bash
-docker compose run --rm debitos-veiculares < '{"placa": "ABC1234"}'
+docker run --rm -i -v ${PWD}/logs:/app/logs debitos-veiculares < '{"placa": "ABC1234"}'
 ```
 
 No Windows (PowerShell):
 
 ```powershell
-'{"placa": "ABC1234"}' | docker compose run --rm debitos-veiculares
+'{"placa": "ABC1234"}' | docker run --rm -i -v ${PWD}/logs:/app/logs debitos-veiculares
 ```
 
 O arquivo de log estará disponível em `logs/search.log` na raiz do projeto, mesmo com o container sendo removido ao final da execução.
@@ -101,7 +103,7 @@ Se você alterou o código, reconstrua a imagem antes de rodar os testes.
 
 ## Como adicionar novos provedores
 
-Para incluir um novo provedor, crie uma nova classe em `src/Provider/` que implemente `ProviderInterface` e registre-a em `ProviderFactory::createAll()`. O serviço usa um normalizador genérico em `src/Normalizer/ProviderResponseNormalizer.php` para converter respostas JSON ou XML ao modelo canônico `VehicleDebts`.
+Para incluir um novo provedor, crie um novo `SimulatedProvider` e registre-a em `ProviderFactory::createAll()`. O serviço usa um normalizador genérico em `src/Normalizer/ProviderResponseNormalizer.php` para converter respostas JSON ou XML ao modelo canônico `VehicleDebts`.
 
 Isso mantém a integração isolada da lógica de negócio: o provedor só busca dados brutos e o adaptador genérico cuida da normalização.
 
@@ -119,7 +121,7 @@ Novos tipos de débito podem ser suportados sem alterar o código de avaliação
 - O projeto valida a placa e rejeita requisições inválidas com `400`.
 - Quando todos os provedores falham, retorna `503`.
 - Quando o tipo de débito não é suportado, retorna `422`.
-- Os logs de busca são salvos em `logs/search.log`, com a placa parcialmente mascarada por privacidade. Use `docker-compose` ou a flag `-v` do `docker run` para persistir esse arquivo fora do container.
+- Os logs de busca são salvos em `logs/search.log`, com a placa parcialmente mascarada por privacidade.
 
 ## Regras de negócio aplicadas
 
@@ -131,7 +133,7 @@ Novos tipos de débito podem ser suportados sem alterar o código de avaliação
 - MULTA: 1,00% ao dia sem teto.
 - Débitos não vencidos (dias de atraso <= 0) não recebem juros.
 - PIX: desconto de 5% aplicado ao valor atualizado total e a cada pagamento parcial.
-- Cartão de crédito: opções fixas `1x`, `6x` e `12x`, com amortização Price a 2,5% ao mês para 6x e 12x.
+- Cartão de crédito: opções fixas `1x`, `6x` e `12x`, com amortização PRICE a 2,5% ao mês para 6x e 12x.
 - Tipos de débito desconhecidos retornam erro `unknown_debt_type`.
 - Placa validada para formatos Mercosul e antigo.
 - Rejeita JSON com campos desconhecidos e corpo maior que 1 MiB.
