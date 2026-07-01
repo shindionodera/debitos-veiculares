@@ -48,4 +48,18 @@ class StructuredLoggerTest extends TestCase
             'response' => ['status' => 'ok', 'value' => 123],
         ], $decoded);
     }
+
+    public function testMasksPlateInsideResponse(): void
+    {
+        $this->logger->logSearch('ABC1234', [
+            'placa'   => 'ABC1234',
+            'debitos' => [],
+        ]);
+
+        $contents = file_get_contents($this->logFile);
+        $jsonPart = substr($contents, strpos($contents, ' - ') + 3);
+        $decoded  = json_decode(trim($jsonPart), true);
+
+        $this->assertSame('ABC****', $decoded['response']['placa']);
+    }
 }

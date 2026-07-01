@@ -15,7 +15,7 @@ class StructuredLogger
     {
         $entry = [
             'placa' => $this->maskPlate($licensePlate),
-            'response' => $response,
+            'response' => $this->maskPlateInResponse($response),
         ];
 
         $line = $this->timestamp() . ' - ' . json_encode($entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -38,6 +38,15 @@ class StructuredLogger
         $masked = str_repeat('*', max(0, $length - 3));
 
         return $visible . $masked;
+    }
+
+    private function maskPlateInResponse(array $response): array
+    {
+        if (isset($response['placa']) && is_string($response['placa'])) {
+            $response['placa'] = $this->maskPlate($response['placa']);
+        }
+
+        return $response;
     }
 
     private function writeLine(string $line): void
